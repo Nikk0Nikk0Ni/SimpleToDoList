@@ -9,7 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import com.niko.todoapp.Activity.MainActivity
+import com.niko.todoapp.ViewModels.AddEditVMFactory
 import com.niko.todoapp.ViewModels.AddEditViewModel
 import com.niko.todoapp.databinding.FragmentShopItemBinding
 
@@ -17,7 +19,10 @@ class ShopItemFragment() : Fragment() {
     private var screenMode: String = UNDEFIND_SCREEN_MODE
     private var shopItemId: Int = UNDEFIND_ID
     private lateinit var binding: FragmentShopItemBinding
-    private val viewModel: AddEditViewModel by viewModels()
+    private val viewModel by lazy {
+        ViewModelProvider(this,AddEditVMFactory(requireActivity().application)
+        )[AddEditViewModel::class.java]
+    }
     var onEditingFinishedListener: OnEditingFinishedListenner? = null
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,11 +69,17 @@ class ShopItemFragment() : Fragment() {
         {
             if (it == true)
                 binding.tilName.error = "Incorrect name"
+            else{
+                binding.tilName.error = null
+            }
         }
         viewModel.errorInputAmount.observe(viewLifecycleOwner)
         {
             if (it == true)
                 binding.tilAmount.error = "Incorrect amount"
+            else {
+                binding.tilAmount.error = null
+            }
         }
     }
 
@@ -92,9 +103,7 @@ class ShopItemFragment() : Fragment() {
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                binding.tilName.error = null
-                removeInputName()
-
+                viewModel.resetErrorInputName()
             }
 
             override fun afterTextChanged(p0: Editable?) {
@@ -109,8 +118,7 @@ class ShopItemFragment() : Fragment() {
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                binding.tilAmount.error = null
-                removeErrorAmount()
+                viewModel.resetErrorInputAmount()
             }
 
             override fun afterTextChanged(p0: Editable?) {

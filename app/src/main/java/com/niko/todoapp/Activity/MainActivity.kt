@@ -14,11 +14,16 @@ import com.niko.todoapp.Adapter.ShopListAdapter
 import com.niko.todoapp.Fragments.ShopItemFragment
 import com.niko.todoapp.R
 import com.niko.todoapp.ViewModels.MainViewModel
+import com.niko.todoapp.ViewModels.MainViewModelFactory
 import com.niko.todoapp.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private var viewModel = MainViewModel()
+    private val viewModel : MainViewModel by lazy {
+        ViewModelProvider(this,MainViewModelFactory(
+            application
+        ))[MainViewModel::class.java]
+    }
     private val adapter = ShopListAdapter()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,7 +31,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         initRecView()
         initButtonAdd()
-        viewModel = ViewModelProvider(this)[viewModel::class.java]
         viewModel.shopList.observe(this) {
             adapter.submitList(it)
         }

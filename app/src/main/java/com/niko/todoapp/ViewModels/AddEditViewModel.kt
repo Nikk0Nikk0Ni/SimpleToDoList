@@ -1,18 +1,24 @@
 package com.niko.todoapp.ViewModels
 
+import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.niko.data.Repository.ListItemRepositoryImplementation
 import com.niko.domain.Models.ShopItem
 import com.niko.domain.UseCases.AddItem
 import com.niko.domain.UseCases.EditItem
 import com.niko.domain.UseCases.GetItemById
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.lang.Exception
 
-class AddEditViewModel : ViewModel() {
-    private val repository = ListItemRepositoryImplementation
+class AddEditViewModel(application: Application) : ViewModel() {
+    private val repository = ListItemRepositoryImplementation(application)
     private val addItem = AddItem(repository)
     private val editItem = EditItem(repository)
     private val getItemById = GetItemById(repository)
@@ -33,13 +39,15 @@ class AddEditViewModel : ViewModel() {
     val isEnd: LiveData<Unit>
         get() = _isEnd
 
+
     fun addItem(inputName: String?, inputAmount: String?) {
         val name = parseName(inputName)
         val amount = parseAmount(inputAmount)
         if (validateInput(name, amount)) {
-            addItem.addItem(ShopItem(name, amount, true))
-            _isEnd.value = Unit
-            Log.e("ADD","+")
+            viewModelScope.launch {
+                addItem.addItem(ShopItem(name, amount, true))
+                _isEnd.postValue(Unit)
+            }
         }
     }
 
@@ -47,16 +55,19 @@ class AddEditViewModel : ViewModel() {
         val name = parseName(inputName)
         val amount = parseAmount(inputAmount)
         if (validateInput(name, amount)) {
-            _shopItem.value?.let { editItem.editItem(it.copy(name, amount)) }
-            _isEnd.value = Unit
+            viewModelScope.launch {
+                _shopItem.value?.let { editItem.editItem(it.copy(name, amount)) }
+                _isEnd.postValue(Unit)
+            }
         }
 
     }
 
     fun getShopItem(id: Int) {
-        val item = getItemById.getItemById(id)
-        _shopItem.value = item
-
+        viewModelScope.launch {
+            val item = getItemById.getItemById(id)
+            _shopItem.postValue(item)
+        }
     }
 
     private fun parseName(name: String?): String {
@@ -91,6 +102,5 @@ class AddEditViewModel : ViewModel() {
     fun resetErrorInputAmount() {
         _errorInputAmount.value = false
     }
-
 
 }

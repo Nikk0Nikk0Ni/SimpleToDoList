@@ -4,10 +4,10 @@ import androidx.lifecycle.LiveData
 import com.niko.domain.Models.ShopItem
 
 interface ListItemRepository {
-    fun addItem(item : ShopItem)
-    fun editItem(item : ShopItem)
+    suspend fun addItem(item : ShopItem)
+    suspend fun editItem(item : ShopItem)
     fun getListItems() : LiveData<List<ShopItem>>
-    fun removeItem(item : ShopItem)
-    fun getItemById(id : Int) : ShopItem
+    suspend fun removeItem(item : ShopItem)
+    suspend fun getItemById(id : Int) : ShopItem
 
 }
