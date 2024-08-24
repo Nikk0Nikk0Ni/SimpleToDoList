@@ -1,27 +1,21 @@
 package com.niko.todoapp.ViewModels
 
-import android.app.Application
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.niko.data.Repository.ListItemRepositoryImplementation
 import com.niko.domain.Models.ShopItem
 import com.niko.domain.UseCases.AddItem
 import com.niko.domain.UseCases.EditItem
 import com.niko.domain.UseCases.GetItemById
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import java.lang.Exception
+import javax.inject.Inject
 
-class AddEditViewModel(application: Application) : ViewModel() {
-    private val repository = ListItemRepositoryImplementation(application)
-    private val addItem = AddItem(repository)
-    private val editItem = EditItem(repository)
-    private val getItemById = GetItemById(repository)
+class AddEditViewModel @Inject constructor(
+    private val addItem: AddItem,
+    private val editItem: EditItem,
+    private val getItemById: GetItemById
+) : ViewModel() {
 
     private val _errorInputName = MutableLiveData<Boolean>()
     val errorInputName: LiveData<Boolean>

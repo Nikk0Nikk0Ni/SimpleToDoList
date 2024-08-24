@@ -2,11 +2,8 @@ package com.niko.todoapp.Activity
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -14,24 +11,33 @@ import com.niko.todoapp.Adapter.ShopListAdapter
 import com.niko.todoapp.Fragments.ShopItemFragment
 import com.niko.todoapp.R
 import com.niko.todoapp.ViewModels.MainViewModel
-import com.niko.todoapp.ViewModels.MainViewModelFactory
+import com.niko.todoapp.ViewModels.ToDoVMFactory
 import com.niko.todoapp.databinding.ActivityMainBinding
+import di.MainApplication
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private val viewModel : MainViewModel by lazy {
-        ViewModelProvider(this,MainViewModelFactory(
-            application
-        ))[MainViewModel::class.java]
+    private val component by lazy {
+        (application as MainApplication).component
+    }
+
+    @Inject
+    lateinit var viewModelFactory: ToDoVMFactory
+    private val viewModel: MainViewModel by lazy {
+        ViewModelProvider(
+            this, viewModelFactory
+        )[MainViewModel::class.java]
     }
     private val adapter = ShopListAdapter()
     override fun onCreate(savedInstanceState: Bundle?) {
+        component.inject(this)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initRecView()
         initButtonAdd()
-        viewModel.shopList.observe(this) {
+        viewModel.shopList.getListItems().observe(this) {
             adapter.submitList(it)
         }
     }
@@ -43,22 +49,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun launchFragmnet(fragment: Fragment) {
         supportFragmentManager.popBackStack()
-        supportFragmentManager.beginTransaction().replace(R.id.ItemContainer, fragment).addToBackStack(null).commit()
+        supportFragmentManager.beginTransaction().replace(R.id.ItemContainer, fragment)
+            .addToBackStack(null).commit()
     }
 
     private fun initButtonAdd() {
-            binding.apply {
-                addbutton.setOnClickListener {
-                    if (isOnePainMode()) {
-                        val intent = ShopItemActivity.newIntentAdd(this@MainActivity)
-                        startActivity(intent)
-                    }else {
-                        val fragment = ShopItemFragment.newInstanceAddItem()
-                        initOnEdditingFinishListenner(fragment)
-                        launchFragmnet(fragment)
-                    }
+        binding.apply {
+            addbutton.setOnClickListener {
+                if (isOnePainMode()) {
+                    val intent = ShopItemActivity.newIntentAdd(this@MainActivity)
+                    startActivity(intent)
+                } else {
+                    val fragment = ShopItemFragment.newInstanceAddItem()
+                    initOnEdditingFinishListenner(fragment)
+                    launchFragmnet(fragment)
                 }
             }
+        }
     }
 
     private fun initRecView() {
@@ -92,8 +99,8 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun initOnEdditingFinishListenner(fragment: ShopItemFragment){
-        fragment.onEditingFinishedListener = object : ShopItemFragment.OnEditingFinishedListenner{
+    fun initOnEdditingFinishListenner(fragment: ShopItemFragment) {
+        fragment.onEditingFinishedListener = object : ShopItemFragment.OnEditingFinishedListenner {
             override fun onEditingFinished() {
                 supportFragmentManager.popBackStack()
             }

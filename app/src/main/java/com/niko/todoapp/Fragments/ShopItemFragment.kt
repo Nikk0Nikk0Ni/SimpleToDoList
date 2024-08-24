@@ -1,5 +1,6 @@
 package com.niko.todoapp.Fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -11,19 +12,30 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import com.niko.todoapp.Activity.MainActivity
-import com.niko.todoapp.ViewModels.AddEditVMFactory
 import com.niko.todoapp.ViewModels.AddEditViewModel
+import com.niko.todoapp.ViewModels.ToDoVMFactory
 import com.niko.todoapp.databinding.FragmentShopItemBinding
+import di.MainApplication
+import javax.inject.Inject
 
 class ShopItemFragment() : Fragment() {
+    private val component by lazy {
+        (requireActivity().application as MainApplication).component
+    }
+    @Inject
+    lateinit var viewModelFactory: ToDoVMFactory
     private var screenMode: String = UNDEFIND_SCREEN_MODE
     private var shopItemId: Int = UNDEFIND_ID
     private lateinit var binding: FragmentShopItemBinding
     private val viewModel by lazy {
-        ViewModelProvider(this,AddEditVMFactory(requireActivity().application)
+        ViewModelProvider(this,viewModelFactory
         )[AddEditViewModel::class.java]
     }
     var onEditingFinishedListener: OnEditingFinishedListenner? = null
+    override fun onAttach(context: Context) {
+        component.inject(this)
+        super.onAttach(context)
+    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

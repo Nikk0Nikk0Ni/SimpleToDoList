@@ -13,11 +13,14 @@ import com.niko.todoapp.Fragments.ShopItemFragment
 import com.niko.todoapp.R
 import com.niko.todoapp.ViewModels.AddEditViewModel
 import com.niko.todoapp.databinding.ActivityShopItemBinding
+import di.MainApplication
+import javax.inject.Inject
 
 class ShopItemActivity : AppCompatActivity() {
     private lateinit var binding: ActivityShopItemBinding
     private var screenMode = UNDEFIND_SCREEN_MODE
     private var shopItemId = UNDEFIND_ID
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityShopItemBinding.inflate(layoutInflater)
